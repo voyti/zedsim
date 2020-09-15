@@ -10,13 +10,12 @@ export class Sprites {
 
   }
 
-  init(initDone) {
+  init() {
     this.appBoard.loader
     .add('./resources/heli/heli.json')
-    .load(() => {
-      this.onAssetsLoaded();
-      initDone();
-    });
+    .load(() => this.onAssetsLoaded());
+
+
   }
 
   onAssetsLoaded() {
@@ -30,8 +29,9 @@ export class Sprites {
 
     // anim.x = this.appBoard.screen.width / 1.5;
     // anim.y = this.appBoard.screen.height / 2;
-    this.heliSprite.animationSpeed = 1;
-    this.heliSprite.play();
+    anim.anchor.set(0.5);
+    anim.animationSpeed = 1;
+    anim.play();
 
     // this.appBoard.stage.addChild(anim);
   }

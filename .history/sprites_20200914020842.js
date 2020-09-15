@@ -10,13 +10,12 @@ export class Sprites {
 
   }
 
-  init(initDone) {
+  init() {
     this.appBoard.loader
     .add('./resources/heli/heli.json')
-    .load(() => {
-      this.onAssetsLoaded();
-      initDone();
-    });
+    .load(() => this.onAssetsLoaded());
+
+
   }
 
   onAssetsLoaded() {
@@ -28,12 +27,13 @@ export class Sprites {
     this.heliSprite = new PIXI.AnimatedSprite(frames);
 
 
-    // anim.x = this.appBoard.screen.width / 1.5;
-    // anim.y = this.appBoard.screen.height / 2;
-    this.heliSprite.animationSpeed = 1;
-    this.heliSprite.play();
+    anim.x = this.appBoard.screen.width / 1.5;
+    anim.y = this.appBoard.screen.height / 2;
+    anim.anchor.set(0.5);
+    anim.animationSpeed = 1;
+    anim.play();
 
-    // this.appBoard.stage.addChild(anim);
+    this.appBoard.stage.addChild(anim);
   }
 
   getUnitSprite(unitType, x = 0, y = 0) {
@@ -47,7 +47,6 @@ export class Sprites {
     };
 
     const spriteSource = typeToSprite[unitType];
-    let unitSprite = null;
 
     if (_.isObject(spriteSource)) {
       unitSprite = spriteSource;

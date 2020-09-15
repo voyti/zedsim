@@ -58,26 +58,16 @@ class Main {
     this.app.stage.addChild(coordsText);
   }
 
-  // TODO: web worker for pathfinding
   initGameLoop() {
-    window.setSpeed = (speed) => {
-      this.unitsService.setGlobalSpeed(speed);
-    }
-
     let loopCount = 0;
 
+    // const units = _.map(zombies, (z) => this.unitsService.addNewZombie(this.spritesService.getZombieSprite(z.x, z.y)));
     let units = [];
-    _.times(100, (i) => {
+    _.times(200, (i) => {
       units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 20 , y: 20 }, {x: 90 , y: 550 }, 'zombie'));
     });
-    _.times(10, (i) => {
-      units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 100 , y: 120 }, {x: 650 , y: 540 }, 'civilian'));
-    });
 
-    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 800 , y: 120 }, {x: 850 , y: 540 }, 'civEx'));
-    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'civilian'));
-    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'zombie'));
-    this.unitsService.setGlobalSpeed(1);
+    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 900 , y: 120 }, {x: 960 , y: 540 }, 'civEx'));
 
     _.forEach(units, (u) => {
       this.app.stage.addChild(u.sprite);

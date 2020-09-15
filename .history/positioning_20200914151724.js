@@ -2,14 +2,12 @@
 import { debugging } from './debugging.js';
 // import createGraph from 'ngraph.graph';
 const OBSTACLE_OUTER_MARGIN = 3;
-const ENABLE_DEBUGGING = false;
 
 export class Positioning {
 
   constructor(appBoard, boardService) {
     this.appBoard = appBoard;
     this.boardService = boardService;
-
     // this.finder = new PF.AStarFinder({
     //   allowDiagonal: true,
     //   dontCrossCorners: true
@@ -89,10 +87,6 @@ export class Positioning {
       callback(path);
     };
 
-    if (_.some([fromPoint.x, fromPoint.y, toPoint.x, toPoint.y], _.isNaN)) {
-      return Error('Trying to find path to NaN coords');
-    }
-
     this.easystarCalculationQueue.push({
       id: Math.random().toString(24).substring(2),
       calculation: () => this.easystar.findPath(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y, internalCallback),
@@ -164,11 +158,11 @@ export class Positioning {
     point.y = point.y < 0 ? -point.y : point.y;
     point.x = point.x >= boardConfig.width ? boardConfig.width - 1 : point.x;
     point.y = point.y >= boardConfig.height ? boardConfig.height - 1 : point.y;
-    debugging.clearDebugGraphicsWhenOver(10);
+    // debugging.clearDebugGraphics();
 
     if (!this.checkIfPointInsideObstacle(point)) {
-      if (ENABLE_DEBUGGING && -unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0x99ff99);
-      if (ENABLE_DEBUGGING && unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
+      if (unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0x99ff99);
+      if (unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
       return point;
     } else {
       // debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'Xdest', 0xff9999);
@@ -184,8 +178,8 @@ export class Positioning {
       const yPossibility = yStartCloserThanEnd ? obstacle.start.y - ADD_MARGIN : obstacle.end.y + ADD_MARGIN;
 
       if (xPossibility < yPossibility && xPossibility > 0) {
-        if (ENABLE_DEBUGGING && unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, xPossibility, point.y, 'Cdest(x)', 0x99ff99);
-        if (ENABLE_DEBUGGING && unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
+        if (unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, xPossibility, point.y, 'Cdest(x)', 0x99ff99);
+        if (unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
 
 
         return { x: xPossibility, y: point.y };

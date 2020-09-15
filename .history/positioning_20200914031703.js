@@ -1,15 +1,13 @@
 
-import { debugging } from './debugging.js';
+// // import { debugging } from './debugging.js';
 // import createGraph from 'ngraph.graph';
 const OBSTACLE_OUTER_MARGIN = 3;
-const ENABLE_DEBUGGING = false;
 
 export class Positioning {
 
   constructor(appBoard, boardService) {
     this.appBoard = appBoard;
     this.boardService = boardService;
-
     // this.finder = new PF.AStarFinder({
     //   allowDiagonal: true,
     //   dontCrossCorners: true
@@ -66,8 +64,8 @@ export class Positioning {
     this.easystar.setAcceptableTiles([0]);
     this.easystar.enableDiagonals();
 
-    // const createGraph = require('ngraph.graph');
-    // const g = createGraph();
+    // var createGraph = require('ngraph.graph');
+    // var g = createGraph();
 
 
     // console.log(this.finder.findPath(62, 86, 758, 534, this.pathGrid));
@@ -88,10 +86,6 @@ export class Positioning {
       this.easystarCalculationQueue = _.tail(this.easystarCalculationQueue);
       callback(path);
     };
-
-    if (_.some([fromPoint.x, fromPoint.y, toPoint.x, toPoint.y], _.isNaN)) {
-      return Error('Trying to find path to NaN coords');
-    }
 
     this.easystarCalculationQueue.push({
       id: Math.random().toString(24).substring(2),
@@ -125,28 +119,28 @@ export class Positioning {
   };
 
   getPointOnOrbitByDegrees(point, distance, degrees) {
-    const outer = { x: point.x, y: point.y - distance };
+    const outer = { x: point.x - distance, y: point.y };
     return this.getRotatedPointByOuterReference(outer, point, degrees);
   }
 
-  calculateAngleInDeg(a, b, c) {
-    const ab = Math.abs(b.x - c.x);
-    const ac = Math.abs(b.y - c.y);
+  calculateAngle(a, b, c) {
+    var ab = Math.abs(b.x - c.x);
+    var ac = Math.abs(b.y - c.y);
 
-    const da = Math.sqrt(ab * ab + ac * ac);
+    var da = Math.sqrt(ab * ab + ac * ac);
 
-    const bb = Math.abs(a.x - c.x);
-    const bc = Math.abs(a.y - c.y);
+    var bb = Math.abs(a.x - c.x);
+    var bc = Math.abs(a.y - c.y);
 
-    const db = Math.sqrt(bb * bb + bc * bc);
+    var db = Math.sqrt(bb * bb + bc * bc);
 
-    const cb = Math.abs(a.x - b.x);
-    const cc = Math.abs(a.y - b.y);
+    var cb = Math.abs(a.x - b.x);
+    var cc = Math.abs(a.y - b.y);
 
-    const dc = Math.sqrt(cb * cb + cc * cc);
+    var dc = Math.sqrt(cb * cb + cc * cc);
 
-    const angleB = Math.acos((da * da + dc * dc - db * db) / (2 * da * dc));
-    return angleB / Math.PI * 180;
+    angleB = Math.acos((da * da + dc * dc - db * db) / (2 * da * dc));
+    return angleB;
   }
 
   getDistanceBetweenPoints(pa, pb) {
@@ -156,7 +150,7 @@ export class Positioning {
     return Math.sqrt( a*a + b*b );
   }
 
-  correctPointToNearestWalkable(point, unit) {
+  correctPointToNearestWalkable(point) {
     const ADD_MARGIN = 1;
     const boardConfig = this.boardService.getConfig();
 
@@ -164,11 +158,10 @@ export class Positioning {
     point.y = point.y < 0 ? -point.y : point.y;
     point.x = point.x >= boardConfig.width ? boardConfig.width - 1 : point.x;
     point.y = point.y >= boardConfig.height ? boardConfig.height - 1 : point.y;
-    debugging.clearDebugGraphicsWhenOver(10);
+    // debugging.clearDebugGraphics();
 
     if (!this.checkIfPointInsideObstacle(point)) {
-      if (ENABLE_DEBUGGING && -unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0x99ff99);
-      if (ENABLE_DEBUGGING && unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
+      // debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0x99ff99);
       return point;
     } else {
       // debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'Xdest', 0xff9999);
@@ -184,15 +177,11 @@ export class Positioning {
       const yPossibility = yStartCloserThanEnd ? obstacle.start.y - ADD_MARGIN : obstacle.end.y + ADD_MARGIN;
 
       if (xPossibility < yPossibility && xPossibility > 0) {
-        if (ENABLE_DEBUGGING && unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, xPossibility, point.y, 'Cdest(x)', 0x99ff99);
-        if (ENABLE_DEBUGGING && unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
-
+        // debugging.placeDebuggingMark(this.appBoard.stage, xPossibility, point.y, 'Cdest(x)', 0x99ff99);
 
         return { x: xPossibility, y: point.y };
       } else if (yPossibility > 0) {
-        if (unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, point.x, yPossibility, 'Cdest(y)', 0x99ff99);
-        if (unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
-
+        // debugging.placeDebuggingMark(this.appBoard.stage, point.x, yPossibility, 'Cdest(y)', 0x99ff99);
 
         return { x: point.x, y: yPossibility };
       } else {
@@ -205,7 +194,7 @@ export class Positioning {
   getWalkablePointAroundUnitInDistance(unit, distance, degrees) {
     const unitPoint = { x: unit.sprite.x, y: unit.sprite.y };
     const initialPoint = this.getPointOnOrbitByDegrees(unitPoint, distance, degrees);
-    return this.correctPointToNearestWalkable(initialPoint, unit);
+    return this.correctPointToNearestWalkable(initialPoint);
   }
 
 }

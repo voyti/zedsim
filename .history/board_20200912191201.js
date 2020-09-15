@@ -2,9 +2,9 @@ export class Board {
 
 
   constructor(appBoard) {
-    this.appBoard = appBoard;
+    this.appBoard = appBoard; 
     this.config = {
-      width: 1000,
+      width: 800,
       height: 600,
       boxObstacles: [
         { x: 95, y: 110 },
@@ -118,7 +118,7 @@ export class Board {
   }
 
   generateBoxExtraction() {
-
+     
     this.generateBoxElement(
       this.config.extraction.start.x,
       this.config.extraction.start.y,
@@ -141,7 +141,7 @@ export class Board {
 
     this.appBoard.stage.addChild(graphics);
 
-  }
+  } 
 }
 
 

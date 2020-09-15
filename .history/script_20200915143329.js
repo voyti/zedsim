@@ -71,13 +71,14 @@ class Main {
       units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 20 , y: 20 }, {x: 90 , y: 550 }, 'zombie'));
     });
     _.times(10, (i) => {
-      units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 100 , y: 120 }, {x: 650 , y: 540 }, 'civilian'));
+      units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 650 , y: 540 }, 'civilian'));
     });
 
-    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 800 , y: 120 }, {x: 850 , y: 540 }, 'civEx'));
-    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'civilian'));
-    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'zombie'));
-    this.unitsService.setGlobalSpeed(1);
+    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 800 , y: 120 }, {x: 850 , y: 540 }, 'civEx'));
+    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'civilian'));
+    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'zombie'));
+    this.unitsService.setGlobalSpeed(0.1);
+
 
     _.forEach(units, (u) => {
       this.app.stage.addChild(u.sprite);

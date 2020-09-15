@@ -2,7 +2,6 @@
 import { debugging } from './debugging.js';
 // import createGraph from 'ngraph.graph';
 const OBSTACLE_OUTER_MARGIN = 3;
-const ENABLE_DEBUGGING = false;
 
 export class Positioning {
 
@@ -167,8 +166,8 @@ export class Positioning {
     debugging.clearDebugGraphicsWhenOver(10);
 
     if (!this.checkIfPointInsideObstacle(point)) {
-      if (ENABLE_DEBUGGING && -unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0x99ff99);
-      if (ENABLE_DEBUGGING && unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
+      if (unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0x99ff99);
+      if (unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
       return point;
     } else {
       // debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'Xdest', 0xff9999);
@@ -184,8 +183,8 @@ export class Positioning {
       const yPossibility = yStartCloserThanEnd ? obstacle.start.y - ADD_MARGIN : obstacle.end.y + ADD_MARGIN;
 
       if (xPossibility < yPossibility && xPossibility > 0) {
-        if (ENABLE_DEBUGGING && unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, xPossibility, point.y, 'Cdest(x)', 0x99ff99);
-        if (ENABLE_DEBUGGING && unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
+        if (unit && unit.type === 'civilian') debugging.placeDebuggingMark(this.appBoard.stage, xPossibility, point.y, 'Cdest(x)', 0x99ff99);
+        if (unit && unit.type === 'zombie') debugging.placeDebuggingMark(this.appBoard.stage, point.x, point.y, 'dest', 0xccff99);
 
 
         return { x: xPossibility, y: point.y };

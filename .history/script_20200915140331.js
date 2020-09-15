@@ -20,6 +20,7 @@ class Main {
       // legacy: true,
     });
     document.body.appendChild(this.app.view);
+    this.speed = 1; // relative speed of all sprites
     this.boardService = new Board(this.app);
     this.spritesService = new Sprites(this.app);
     this.positioningService = new Positioning(this.app, this.boardService);
@@ -61,23 +62,22 @@ class Main {
   // TODO: web worker for pathfinding
   initGameLoop() {
     window.setSpeed = (speed) => {
-      this.unitsService.setGlobalSpeed(speed);
+      this.positioningService.setGlobalSpeed(speed);
     }
 
     let loopCount = 0;
 
     let units = [];
-    _.times(100, (i) => {
-      units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 20 , y: 20 }, {x: 90 , y: 550 }, 'zombie'));
-    });
-    _.times(10, (i) => {
-      units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 100 , y: 120 }, {x: 650 , y: 540 }, 'civilian'));
-    });
+    // _.times(100, (i) => {
+    //   units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 20 , y: 20 }, {x: 90 , y: 550 }, 'zombie'));
+    // });
+    // _.times(1, (i) => {
+    //   units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 650 , y: 540 }, 'zombie'));
+    // });
 
-    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 800 , y: 120 }, {x: 850 , y: 540 }, 'civEx'));
-    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'civilian'));
-    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'zombie'));
-    this.unitsService.setGlobalSpeed(1);
+    // units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 800 , y: 120 }, {x: 850 , y: 540 }, 'civEx'));
+    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'civilian'));
+    units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 220 , y: 140 }, 'zombie'));
 
     _.forEach(units, (u) => {
       this.app.stage.addChild(u.sprite);

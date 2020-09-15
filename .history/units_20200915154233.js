@@ -273,11 +273,10 @@ export class Units {
     });
   }
 
-  moveUnitTowardsAnother(unitToMove, targetUnit, distanceTo, chase) {
+  moveUnitTowardsAnother(unitToMove, targetUnit, distanceTo) {
     const directionTowardsAnother = this.getDirectionTowards(unitToMove, targetUnit.sprite);
     console.debug('Moving ', unitToMove.type, ' towards', targetUnit.type, '; direction is ', directionTowardsAnother);
-    const overshootDist = chase ? CHASE_DIST_OVERSHOOT_RATIO * distanceTo : distanceTo;
-    this.moveUnitInDirection(unitToMove, directionTowardsAnother, Math.min(overshootDist || ZOMBIE_ROAM_DISTANCE));
+    this.moveUnitInDirection(unitToMove, directionTowardsAnother, Math.min(1.3 * distanceTo || ZOMBIE_ROAM_DISTANCE));
   }
 
   isUnitPresent(unitType) {

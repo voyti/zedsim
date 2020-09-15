@@ -1,8 +1,6 @@
 const UNIT_LOOP_DECISION_MAKING_THRESHOLD = 100;
 const ZOMBIE_ROAM_DISTANCE = 100;
 const CIVILIAN_ROAM_DISTANCE = 200;
-const CHASE_DIST_OVERSHOOT_RATIO = 1.3;
-
 const NON_ZOMBIE_UNITS = ['nationalGuard', 'abConUnit', 'abExUnit', 'civilian'];
 export class Units {
 
@@ -18,12 +16,6 @@ export class Units {
     this.abExUnits = [];
     this.civExUnits = [];
     this.civilians = [];
-
-    this.globalSpeed = 1;
-  }
-
-  setGlobalSpeed(speed) {
-    this.globalSpeed = speed;
   }
 
   getAllUnits() {
@@ -151,11 +143,9 @@ export class Units {
       }, {
         type: 'pursuit',
         priority: 2,
-        condition: (unit) => this.getDistancesToUnitsAsc(NON_ZOMBIE_UNITS, unit) || unit.currentPath,
+        condition: (unit) => this.getUnitsInRange(NON_ZOMBIE_UNITS, unit),
         conditionRelevantParam: 'length',
-        action: (unit, conditionResult) => {
-          if (conditionResult.length) this.moveUnitTowardsAnother(unit, conditionResult[0].unit, conditionResult[0].distanceTo, true);
-        },
+        action: (unit, conditionResult) => this.moveUnitTowardsAnother(unit, conditionResult[0]),
       }
     ];
 
@@ -169,30 +159,20 @@ export class Units {
         type: 'proceedToExtraction',
         priority: 1,
         condition: () => this.isUnitPresent('civEx') && this.hasUnitStatus('civEx', 'acceptingCivilians'),
-        action: (unit) => this.moveUnitInDirection(unit, this.getDirectionTowardsClosest(unit, 'civEx'), CIVILIAN_ROAM_DISTANCE),
+        action: (unit) => this.moveUnitInDirection(unit, this.getDirectionTowards(), CIVILIAN_ROAM_DISTANCE),
       }, {
-        type: 'escape',
+        type: 'pursuit',
         priority: 2,
-        condition: (unit) => this.getUnitsInRange('zombie', unit),
+        condition: (unit) => this.getUnitsInRange(NON_ZOMBIE_UNITS, unit),
         conditionRelevantParam: 'length',
-        action: (unit, conditionResult) =>  this.moveUnitInDirection(unit, this.getDirectionTowardsClosest(unit, 'zombie') - 180, CIVILIAN_ROAM_DISTANCE),
+        action: (unit, conditionResult) => this.moveUnitTowardsAnother(unit, conditionResult[0]),
       }, {
         type: 'extract',
         priority: 3,
-        condition: (unit) => this.getUnitsInRange('civEx', unit),
+        condition: (unit) => this.getUnitsInRange(NON_ZOMBIE_UNITS, unit),
         conditionRelevantParam: 'length',
         action: (unit, conditionResult) => this.moveUnitTowardsAnother(unit, conditionResult[0]),
-      },
-      // {
-      //   type: 'test',
-      //   priority: 99,
-      //   condition: (unit) => true,
-      //   action: (unit) => {
-      //     const dir = _.sample([90, -90, -115, 115]);
-      //     console.warn('--- DIR ', dir);
-      //     this.moveUnitInDirection(unit, dir, 40);
-      //   },
-      // },
+      }
     ];
 
     const typeBehaviorsMap = {
@@ -226,37 +206,17 @@ export class Units {
     });
   }
 
-  getDistancesToUnitsAsc(unitTypes, thisUnit, range) {
+  getUnitsInRange(unitTypes, centerUnit, range) {
     const relevantUnits = _.filter(this.getAllUnits(), (unit) => _.includes(unitTypes, unit.type));
     const unitsWithDistances = _.map(relevantUnits, (unit) => ({
       unit,
-      distanceTo: this.positioningService.getDistanceBetweenPoints(thisUnit.sprite, unit.sprite),
+      distanceTo: this.positioningService.getDistanceBetweenPoints(centerUnit, unit),
     }));
 
-    const relevantRange = range || thisUnit.detectionRange;
+    const relevantRange = range || unit.detectionRange;
     const unitsInRange = _.filter(unitsWithDistances,  (unitDist) => unitDist.distanceTo <= relevantRange);
 
-    return _.orderBy(unitsInRange,  'distanceTo');
-  }
-
-  getUnitsInRange(unitTypes, thisUnit, range) {
-    const ranges = this.getDistancesToUnitsAsc(unitTypes, thisUnit, range);
-    return _.map(ranges, 'unit');
-  }
-
-  getDirectionTowardsClosest(thisUnit, unitType) {
-    const units = this.getUnitsInRange(unitType, thisUnit, Math.max(this.config.width, this.config.height));
-    const closestUnit = units[0];
-    if (thisUnit.type === 'civilian') console.error(this.getDirectionTowards(thisUnit, closestUnit.sprite));
-
-    return this.getDirectionTowards(thisUnit, closestUnit.sprite);
-  }
-
-  getDirectionTowards(thisUnit, point) {
-    const upwardsRef = { x: thisUnit.sprite.x, y: thisUnit.sprite.y - 10 };
-
-    const angle = this.positioningService.calculateAngleInDeg(upwardsRef, thisUnit.sprite, point);
-    return thisUnit.sprite.x > point.x ? -angle : angle;
+    return _.map(_.orderBy(unitsInRange,  'distanceTo'), 'unit');
   }
 
   getRandomDirection() {
@@ -273,11 +233,9 @@ export class Units {
     });
   }
 
-  moveUnitTowardsAnother(unitToMove, targetUnit, distanceTo, chase) {
-    const directionTowardsAnother = this.getDirectionTowards(unitToMove, targetUnit.sprite);
-    console.debug('Moving ', unitToMove.type, ' towards', targetUnit.type, '; direction is ', directionTowardsAnother);
-    const overshootDist = chase ? CHASE_DIST_OVERSHOOT_RATIO * distanceTo : distanceTo;
-    this.moveUnitInDirection(unitToMove, directionTowardsAnother, Math.min(overshootDist || ZOMBIE_ROAM_DISTANCE));
+  moveUnitTowardsAnother(unitToMove, targetUnit) {
+    // unit.currentPath = this.positioningService.getPathFromSpriteTo(unit.sprite, walkablePoint);
+    unit.currentPathStep = 0;
   }
 
   isUnitPresent(unitType) {
@@ -289,9 +247,7 @@ export class Units {
   }
 
   increaseUnitStep(unit, loopPass) {
-    if (unit.currentPath &&
-      (!unit.lastMovedPass || (loopPass % (Math.floor(1 / unit.speed * 1 / this.globalSpeed))) === 0 )) {
-
+    if (unit.currentPath && (!unit.lastMovedPass || (loopPass % (Math.floor(1 / unit.speed))) === 0 )) {
       if (unit.currentPath.length && unit.currentPathStep >= unit.currentPath.length - 1) {
         unit.currentPath = null;
         unit.currentPathStep = null;

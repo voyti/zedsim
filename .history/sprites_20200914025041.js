@@ -10,13 +10,12 @@ export class Sprites {
 
   }
 
-  init(initDone) {
+  init() {
     this.appBoard.loader
     .add('./resources/heli/heli.json')
-    .load(() => {
-      this.onAssetsLoaded();
-      initDone();
-    });
+    .load(() => this.onAssetsLoaded());
+
+
   }
 
   onAssetsLoaded() {

@@ -71,7 +71,7 @@ class Main {
       units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 20 , y: 20 }, {x: 90 , y: 550 }, 'zombie'));
     });
     _.times(10, (i) => {
-      units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 100 , y: 120 }, {x: 650 , y: 540 }, 'civilian'));
+      units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 200 , y: 120 }, {x: 650 , y: 540 }, 'civilian'));
     });
 
     units.push(this.unitsService.spawnNewUnitInRandomLocation({x: 800 , y: 120 }, {x: 850 , y: 540 }, 'civEx'));

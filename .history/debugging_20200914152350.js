@@ -49,7 +49,7 @@ export const debugging = {
 
     if (debugTexts.length > num) {
       _.forEach( debugTexts.splice(0, num), (debugText) => {
-        debugText.destroy();
+        graphics.destroy();
       });
     }
   }

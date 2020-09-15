@@ -1,8 +1,6 @@
 const UNIT_LOOP_DECISION_MAKING_THRESHOLD = 100;
 const ZOMBIE_ROAM_DISTANCE = 100;
 const CIVILIAN_ROAM_DISTANCE = 200;
-const CHASE_DIST_OVERSHOOT_RATIO = 1.3;
-
 const NON_ZOMBIE_UNITS = ['nationalGuard', 'abConUnit', 'abExUnit', 'civilian'];
 export class Units {
 
@@ -19,11 +17,7 @@ export class Units {
     this.civExUnits = [];
     this.civilians = [];
 
-    this.globalSpeed = 1;
-  }
-
-  setGlobalSpeed(speed) {
-    this.globalSpeed = speed;
+    this.speed = 1;
   }
 
   getAllUnits() {
@@ -151,10 +145,10 @@ export class Units {
       }, {
         type: 'pursuit',
         priority: 2,
-        condition: (unit) => this.getDistancesToUnitsAsc(NON_ZOMBIE_UNITS, unit) || unit.currentPath,
+        condition: (unit) => this.getUnitsInRange(NON_ZOMBIE_UNITS, unit) || unit.currentPath,
         conditionRelevantParam: 'length',
         action: (unit, conditionResult) => {
-          if (conditionResult.length) this.moveUnitTowardsAnother(unit, conditionResult[0].unit, conditionResult[0].distanceTo, true);
+          if (conditionResult.length) this.moveUnitTowardsAnother(unit, conditionResult[0]);
         },
       }
     ];
@@ -226,7 +220,7 @@ export class Units {
     });
   }
 
-  getDistancesToUnitsAsc(unitTypes, thisUnit, range) {
+  getUnitsInRange(unitTypes, thisUnit, range) {
     const relevantUnits = _.filter(this.getAllUnits(), (unit) => _.includes(unitTypes, unit.type));
     const unitsWithDistances = _.map(relevantUnits, (unit) => ({
       unit,
@@ -236,12 +230,7 @@ export class Units {
     const relevantRange = range || thisUnit.detectionRange;
     const unitsInRange = _.filter(unitsWithDistances,  (unitDist) => unitDist.distanceTo <= relevantRange);
 
-    return _.orderBy(unitsInRange,  'distanceTo');
-  }
-
-  getUnitsInRange(unitTypes, thisUnit, range) {
-    const ranges = this.getDistancesToUnitsAsc(unitTypes, thisUnit, range);
-    return _.map(ranges, 'unit');
+    return _.map(_.orderBy(unitsInRange,  'distanceTo'), 'unit');
   }
 
   getDirectionTowardsClosest(thisUnit, unitType) {
@@ -255,8 +244,7 @@ export class Units {
   getDirectionTowards(thisUnit, point) {
     const upwardsRef = { x: thisUnit.sprite.x, y: thisUnit.sprite.y - 10 };
 
-    const angle = this.positioningService.calculateAngleInDeg(upwardsRef, thisUnit.sprite, point);
-    return thisUnit.sprite.x > point.x ? -angle : angle;
+    return this.positioningService.calculateAngleInDeg(upwardsRef, thisUnit.sprite, point);
   }
 
   getRandomDirection() {
@@ -273,11 +261,10 @@ export class Units {
     });
   }
 
-  moveUnitTowardsAnother(unitToMove, targetUnit, distanceTo, chase) {
+  moveUnitTowardsAnother(unitToMove, targetUnit) {
     const directionTowardsAnother = this.getDirectionTowards(unitToMove, targetUnit.sprite);
     console.debug('Moving ', unitToMove.type, ' towards', targetUnit.type, '; direction is ', directionTowardsAnother);
-    const overshootDist = chase ? CHASE_DIST_OVERSHOOT_RATIO * distanceTo : distanceTo;
-    this.moveUnitInDirection(unitToMove, directionTowardsAnother, Math.min(overshootDist || ZOMBIE_ROAM_DISTANCE));
+    this.moveUnitInDirection(unitToMove, directionTowardsAnother, ZOMBIE_ROAM_DISTANCE);
   }
 
   isUnitPresent(unitType) {
@@ -290,7 +277,7 @@ export class Units {
 
   increaseUnitStep(unit, loopPass) {
     if (unit.currentPath &&
-      (!unit.lastMovedPass || (loopPass % (Math.floor(1 / unit.speed * 1 / this.globalSpeed))) === 0 )) {
+      (!unit.lastMovedPass || (loopPass % (Math.floor(1 / unit.speed * this.globalSpeed))) === 0 )) {
 
       if (unit.currentPath.length && unit.currentPathStep >= unit.currentPath.length - 1) {
         unit.currentPath = null;
